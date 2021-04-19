@@ -1,13 +1,11 @@
-import net.mamoe.mirai.console.plugin.description.PluginDependency;
+import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.console.extension.PluginComponentStorage;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
-import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription;
+import net.mamoe.mirai.console.plugin.jvm.JavaPluginScheduler;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
-import net.mamoe.mirai.console.util.SemVersion;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Set;
-
-public class TaskPlugin extends JavaPlugin {
+public final class TaskPlugin extends JavaPlugin {
     public static final TaskPlugin INSTANCE = new TaskPlugin();
     private TaskPlugin() {
         super(new JvmPluginDescriptionBuilder("com.v6486449j.task-plugin", "1.0.0")
@@ -17,12 +15,22 @@ public class TaskPlugin extends JavaPlugin {
     }
 
     @Override
-    public void onEnable() {
+    public void onLoad(@NotNull PluginComponentStorage $this$onLoad) {
 
     }
 
     @Override
-    public void onDisable() {
+    public void onEnable() {
+        getLogger().info("TaskPlugin加载");
+        INSTANCE.getScheduler().delayed(2000, () -> {
+            for(Bot bot : Bot.getInstances()) {
+                bot.getEventChannel().registerListenerHost(new MyEventsListener());
+                getLogger().info(String.valueOf(bot.getId()) + "注册群监听器");
+            }
+        });
+    }
 
+    @Override
+    public void onDisable() {
     }
 }
