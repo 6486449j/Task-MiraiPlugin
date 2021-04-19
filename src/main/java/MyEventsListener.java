@@ -15,14 +15,16 @@ public class MyEventsListener extends SimpleListenerHost {
     @EventHandler
     public void groupMsgEvent(@NotNull GroupMessageEvent event) throws Exception {
         if(event.getGroup().getId() == 782515841L) {
-            String msg = event.getMessage().toString();
+//            String msg = event.getMessage().toString();
+            String msg = event.getMessage().contentToString();
             event.getSubject().sendMessage("发送了消息" + msg);
         }
     }
     @EventHandler
     public void friendMsgEvent(@NotNull FriendMessageEvent event) throws Exception {
         if(event.getFriend().getId() == 1966063360L) {
-            String msg = event.getMessage().toString();
+//            String msg = event.getMessage().toString();
+            String msg = event.getMessage().contentToString();
             event.getSubject().sendMessage("发送了消息" + msg);
         }
     }
