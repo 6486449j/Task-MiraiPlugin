@@ -15,6 +15,7 @@ public final class TaskPlugin extends JavaPlugin {
     public MiraiLogger logger = getLogger();
 
     private List<TaskChecker> checkers = new ArrayList<>();
+
     private TaskPlugin() {
         super(new JvmPluginDescriptionBuilder("com.v6486449j.task-plugin", "1.0.0")
         .author("6486449j")
@@ -32,9 +33,9 @@ public final class TaskPlugin extends JavaPlugin {
         logger.info("TaskPlugin加载");
 
         TaskPlugin.INSTANCE.reloadPluginConfig(PluginConfig.INSTANCE);
-        logger.info("加载配置");
+//        logger.info("加载配置");
         TaskPlugin.INSTANCE.reloadPluginData(PluginData.INSTANCE);
-        logger.info("加载数据");
+//        logger.info("加载数据");
 
         INSTANCE.getScheduler().delayed(2000, () -> {
             for(Bot bot : Bot.getInstances()) {
