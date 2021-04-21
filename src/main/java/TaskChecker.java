@@ -27,21 +27,21 @@ public class TaskChecker implements Runnable{
 
         List<String> list = new ArrayList<>();
 
-        for(String s : PluginData.INSTANCE.getTasks()) {
-            Pattern p = Pattern.compile(pattern);
-            Matcher m = p.matcher(s);
-
-            TaskPlugin.INSTANCE.logger.info("正则测试");
-
-            if(m.find() && date >= Long.valueOf(m.group(3))) {
-                if(Long.valueOf(m.group(1)) != 0) {
-                    bot.getGroup(Long.valueOf(m.group(1))).sendMessage("事务" + m.group(4));
-                } else {
-                    bot.getFriend(Long.valueOf(m.group(2))).sendMessage("事务" + m.group(4));
-                }
-                list.add(s);
-            }
-        }
+//        for(String s : PluginData.INSTANCE.getTasks()) {
+//            Pattern p = Pattern.compile(pattern);
+//            Matcher m = p.matcher(s);
+//
+//            TaskPlugin.INSTANCE.logger.info("正则测试");
+//
+//            if(m.find() && date >= Long.valueOf(m.group(3))) {
+//                if(Long.valueOf(m.group(1)) != 0) {
+//                    bot.getGroup(Long.valueOf(m.group(1))).sendMessage("事务" + m.group(4));
+//                } else {
+//                    bot.getFriend(Long.valueOf(m.group(2))).sendMessage("事务" + m.group(4));
+//                }
+//                list.add(s);
+//            }
+//        }
 
         for(String s : list) {
             PluginData.INSTANCE.getTasks().remove(s);

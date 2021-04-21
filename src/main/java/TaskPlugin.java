@@ -1,3 +1,4 @@
+import Bean.Task;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.extension.PluginComponentStorage;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
@@ -6,6 +7,9 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 import net.mamoe.mirai.utils.MiraiLogger;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,10 +45,30 @@ public final class TaskPlugin extends JavaPlugin {
             for(Bot bot : Bot.getInstances()) {
                 bot.getEventChannel().registerListenerHost(new MyEventsListener());
                 logger.info(String.valueOf(bot.getId()) + "注册监听器");
-                checkers.add(new TaskChecker(bot));
+                //checkers.add(new TaskChecker(bot));
             }
             for(TaskChecker ch : checkers) {
-                INSTANCE.getScheduler().repeating(10000, ch);
+                //INSTANCE.getScheduler().repeating(10000, ch);
+            }
+            Task task = new Task();
+            task.setMenberId(1966063360L);
+            task.setGroupId(123456789L);
+            task.setTime(202104211300L);
+            task.setTaskContent("测试内容");
+            task.setType("group");
+            try {
+                File path = new File("./config/task_plugin/");
+                File file = new File(path, "json_test.json");
+                if(!path.exists()) {
+                    path.mkdirs();
+                }
+                if(!file.exists()) {
+                    file.createNewFile();
+                }
+                FileReader fr = new FileReader(file);
+//                fr.read();
+            } catch(Exception e) {
+                e.printStackTrace();
             }
         });
     }

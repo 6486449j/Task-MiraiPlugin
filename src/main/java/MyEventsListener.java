@@ -11,7 +11,9 @@ import net.mamoe.mirai.event.events.MessageEvent;
 import net.mamoe.mirai.message.data.MessageChain;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -42,15 +44,44 @@ public class MyEventsListener extends SimpleListenerHost {
     }
 
     public boolean addTask(Long groupId, Long menberId, String rawMsg) {
-        String pattern = "^添加事务\\s+(\\d{12})\\s+(.*)";
+        String pattern = "^添加事务\\s+(\\d+)\\s+(.*)";
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(rawMsg);
 
         if(m.find()) {
-//            subject.sendMessage("匹配！\n组数：" + m.groupCount() + "\n组0： " + m.group(0) + "\n组1：" + m.group(1) + "\n组2：" + m.group(2));
-            PluginData.INSTANCE.getTasks().add(String.valueOf(groupId + " " + menberId) + " " + m.group(1) + " " + m.group(2));
-//            subject.sendMessage(PluginData.INSTANCE.getTasks().toString());
+            String time = m.group(1);
+            Date date = new Date();
+            if(time.length() == 4) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                time = sdf.format(date) + time;
+            }
+            if(time.length() == 8) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+                time = sdf.format(date) + time;
+            }
+            if(time.length() == 12) {
+//                PluginData.INSTANCE.getTasks().add(String.valueOf(groupId) + " " + String.valueOf(menberId) + " " + time + " " + m.group(2));
+                return true;
+            }
         }
-        return true;
+        return false;
+    }
+    public boolean removeTask(Long groupId, Long menberId, String rawMsg) {
+        String pattern = "^删除事务\\s+(\\d+)";
+        Pattern p = Pattern.compile(pattern);
+        Matcher m = p.matcher(rawMsg);
+        String time = m.group(1);
+        if(m.find()) {
+            List<String> subList = new ArrayList<>();
+            String pattern2 = "(\\d+)\\s(\\d+)\\s(\\d{12})\\s(.*)";
+//            for(String s : PluginData.INSTANCE.getTasks()) {
+//                Pattern p2 = Pattern.compile(pattern2);
+//                Matcher m2 =p2.matcher(s);
+//                if(m2.find() && m2.group(3) == time) {
+//                    subList.add(s);
+//                }
+//            }
+        }
+        return false;
     }
 }
