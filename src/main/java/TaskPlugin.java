@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,46 +30,43 @@ public final class TaskPlugin extends JavaPlugin {
 
     @Override
     public void onLoad(@NotNull PluginComponentStorage $this$onLoad) {
+        //加载数据
+        try {
+            File path = new File("./config/task_plugin/");
+            File file = new File(path, "json_test.json");
+            if(!path.exists()) {
+                path.mkdirs();
+            }
+            if(!file.exists()) {
+                file.createNewFile();
+            }
+            FileReader fr = new FileReader(file);
+            fr.read();
+        } catch(Exception e) {
+            e.printStackTrace();
+        } finally {
 
+        }
     }
 
     @Override
     public void onEnable() {
         logger.info("TaskPlugin加载");
 
+        //加载配置
         TaskPlugin.INSTANCE.reloadPluginConfig(PluginConfig.INSTANCE);
-//        logger.info("加载配置");
         TaskPlugin.INSTANCE.reloadPluginData(PluginData.INSTANCE);
-//        logger.info("加载数据");
 
         INSTANCE.getScheduler().delayed(2000, () -> {
+            //获取所有Bot实例
             for(Bot bot : Bot.getInstances()) {
+                //注册监听器
                 bot.getEventChannel().registerListenerHost(new MyEventsListener());
-                logger.info(String.valueOf(bot.getId()) + "注册监听器");
+
                 //checkers.add(new TaskChecker(bot));
             }
             for(TaskChecker ch : checkers) {
                 //INSTANCE.getScheduler().repeating(10000, ch);
-            }
-            Task task = new Task();
-            task.setMenberId(1966063360L);
-            task.setGroupId(123456789L);
-            task.setTime(202104211300L);
-            task.setTaskContent("测试内容");
-            task.setType("group");
-            try {
-                File path = new File("./config/task_plugin/");
-                File file = new File(path, "json_test.json");
-                if(!path.exists()) {
-                    path.mkdirs();
-                }
-                if(!file.exists()) {
-                    file.createNewFile();
-                }
-                FileReader fr = new FileReader(file);
-//                fr.read();
-            } catch(Exception e) {
-                e.printStackTrace();
             }
         });
     }

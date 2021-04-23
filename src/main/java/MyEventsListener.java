@@ -1,21 +1,14 @@
-import jdk.tools.jlink.plugin.Plugin;
-import kotlin.PublishedApi;
 import kotlin.coroutines.CoroutineContext;
-import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.SimpleListenerHost;
 import net.mamoe.mirai.event.events.FriendMessageEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
-import net.mamoe.mirai.event.events.MessageEvent;
-import net.mamoe.mirai.message.data.MessageChain;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +32,7 @@ public class MyEventsListener extends SimpleListenerHost {
         if(event.getFriend().getId() == PluginConfig.INSTANCE.getAdmin()) {
             if(addTask(0L, event.getSubject().getId(), event.getMessage().contentToString())) {
                 event.getSubject().sendMessage(PluginData.INSTANCE.getTasks().toString());
+
             }
         }
     }
