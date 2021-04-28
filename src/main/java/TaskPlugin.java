@@ -1,16 +1,13 @@
 import Bean.Task;
+import com.alibaba.fastjson.JSONObject;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.extension.PluginComponentStorage;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
-import net.mamoe.mirai.console.plugin.jvm.JavaPluginScheduler;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 import net.mamoe.mirai.utils.MiraiLogger;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.nio.CharBuffer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +17,8 @@ public final class TaskPlugin extends JavaPlugin {
     public MiraiLogger logger = getLogger();
 
     private List<TaskChecker> checkers = new ArrayList<>();
+
+    private List<Task> tasks = new ArrayList<>();
 
     private TaskPlugin() {
         super(new JvmPluginDescriptionBuilder("com.v6486449j.task-plugin", "1.0.0")
@@ -40,13 +39,19 @@ public final class TaskPlugin extends JavaPlugin {
             if(!file.exists()) {
                 file.createNewFile();
             }
-            FileReader fr = new FileReader(file);
-            fr.read();
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+
+            String str = "";
+            while((str = br.readLine()) != null) {}
+            JSONObject jsonObject = JSONObject.parseObject(str);
+
+            fis.close();
         } catch(Exception e) {
             e.printStackTrace();
-        } finally {
+        } /*finally {
 
-        }
+        }*/
     }
 
     @Override
