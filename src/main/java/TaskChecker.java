@@ -25,11 +25,16 @@ public class TaskChecker implements Runnable{
         List<Task> tasks = TaskPlugin.INSTANCE.tasks.getTasks();
 
         Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmm");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
 
         Collection<Task> removed = new ArrayList<>();
+
+        // 检查是否有事务到期
         for(Task task : tasks) {
-            if(Long.valueOf(sdf.format(date)) >= task.getTime()) {
+//            TaskPlugin.INSTANCE.logger.info("检查事务");
+//            TaskPlugin.INSTANCE.logger.info(String.valueOf(task.getTime()) + " " + sdf.format(date).toString());
+
+            if(Long.valueOf(sdf.format(date).toString()) >= task.getTime()) {
                 if(task.getGroupId() == 0) {
                     bot.getFriend(task.getMenberId()).sendMessage(task.getTaskContent());
                 } else {
@@ -42,6 +47,9 @@ public class TaskChecker implements Runnable{
 
         tasks.removeAll(removed);
 
+        TaskPlugin.INSTANCE.writeConfig();
+
+/*
         try {
             FileOutputStream fos = new FileOutputStream(TaskPlugin.INSTANCE.configFile);
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
@@ -49,8 +57,12 @@ public class TaskChecker implements Runnable{
             String jsonString = JSONObject.toJSONString(tasks);
 
             bw.write(jsonString);
+            bw.flush();
+            fos.close();
+            TaskPlugin.INSTANCE.logger.info("写入文件");
         } catch(Exception e) {
             e.printStackTrace();
         }
+*/
     }
 }

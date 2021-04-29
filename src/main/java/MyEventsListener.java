@@ -1,4 +1,5 @@
 import Bean.Task;
+import com.alibaba.fastjson.JSONObject;
 import kotlin.coroutines.CoroutineContext;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.SimpleListenerHost;
@@ -15,29 +16,34 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MyEventsListener extends SimpleListenerHost {
+
     @Override
     public void handleException(@NotNull CoroutineContext context, @NotNull Throwable exception) {
         super.handleException(context, exception);
     }
 
+    // 群组事件监听
     @EventHandler
     public void groupMsgEvent(@NotNull GroupMessageEvent event) throws Exception {
         if(PluginConfig.INSTANCE.getGroups().contains(event.getGroup().getId())) {
             if(testAddTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
-                event.getSubject().sendMessage(PluginData.INSTANCE.getTasks().toString());
+                event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
             }
         }
     }
 
+    // 私聊事件监听
     @EventHandler
     public void friendMsgEvent(@NotNull FriendMessageEvent event) throws Exception {
         if(event.getFriend().getId() == PluginConfig.INSTANCE.getAdmin()) {
             if(testAddTask(0L, event.getSubject().getId(), event.getMessage().contentToString())) {
-                event.getSubject().sendMessage(PluginData.INSTANCE.getTasks().toString());
+//                event.getSubject().sendMessage(PluginData.INSTANCE.getTasks().toString());
+                event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
             }
         }
     }
 
+    // 测试添加事务命令
     public boolean testAddTask(Long groupId, Long menberId, String rawMsg) {
         String pattern = "^添加事务\\s+(\\d+)\\s+(.*)";
         Pattern p = Pattern.compile(pattern);
@@ -62,10 +68,13 @@ public class MyEventsListener extends SimpleListenerHost {
         }
         return false;
     }
+
+    // 测试删除事务命令
     public boolean testRemoveTask(Long groupId, Long menberId, String rawMsg) {
         String pattern = "^删除事务\\s+(\\d+)";
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(rawMsg);
+
         String time = m.group(1);
         if(m.find()) {
             List<Task> subList = new ArrayList();
@@ -91,10 +100,10 @@ public class MyEventsListener extends SimpleListenerHost {
                     }
                 }
             }
-//            TaskPlugin.INSTANCE.tasks.getTasks().remove();
         }
         return false;
     }
+
     enum TaskType{
         Monthly(0),
         Weekly(1),
