@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -22,7 +23,7 @@ public class MyEventsListener extends SimpleListenerHost {
     @EventHandler
     public void groupMsgEvent(@NotNull GroupMessageEvent event) throws Exception {
         if(PluginConfig.INSTANCE.getGroups().contains(event.getGroup().getId())) {
-            if(addTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
+            if(testAddTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
                 event.getSubject().sendMessage(PluginData.INSTANCE.getTasks().toString());
             }
         }
@@ -31,14 +32,13 @@ public class MyEventsListener extends SimpleListenerHost {
     @EventHandler
     public void friendMsgEvent(@NotNull FriendMessageEvent event) throws Exception {
         if(event.getFriend().getId() == PluginConfig.INSTANCE.getAdmin()) {
-            if(addTask(0L, event.getSubject().getId(), event.getMessage().contentToString())) {
+            if(testAddTask(0L, event.getSubject().getId(), event.getMessage().contentToString())) {
                 event.getSubject().sendMessage(PluginData.INSTANCE.getTasks().toString());
-
             }
         }
     }
 
-    public boolean addTask(Long groupId, Long menberId, String rawMsg) {
+    public boolean testAddTask(Long groupId, Long menberId, String rawMsg) {
         String pattern = "^添加事务\\s+(\\d+)\\s+(.*)";
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(rawMsg);
@@ -62,21 +62,36 @@ public class MyEventsListener extends SimpleListenerHost {
         }
         return false;
     }
-    public boolean removeTask(Long groupId, Long menberId, String rawMsg) {
+    public boolean testRemoveTask(Long groupId, Long menberId, String rawMsg) {
         String pattern = "^删除事务\\s+(\\d+)";
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(rawMsg);
         String time = m.group(1);
         if(m.find()) {
-            List<String> subList = new ArrayList<>();
-            String pattern2 = "(\\d+)\\s(\\d+)\\s(\\d{12})\\s(.*)";
-//            for(String s : PluginData.INSTANCE.getTasks()) {
-//                Pattern p2 = Pattern.compile(pattern2);
-//                Matcher m2 =p2.matcher(s);
-//                if(m2.find() && m2.group(3) == time) {
-//                    subList.add(s);
-//                }
-//            }
+            List<Task> subList = new ArrayList();
+            for(Task task : TaskPlugin.INSTANCE.tasks.getTasks()) {
+                if(task.getGroupId() == groupId && task.getMenberId() == menberId && task.getTime() == Long.valueOf(time)) {
+                    subList.add(task);
+                }
+            }
+            if(subList.size() >= 1) {
+                if(subList.size() == 1) {
+                    TaskPlugin.INSTANCE.tasks.getTasks().remove(subList.get(0));
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    int i = 0;
+                    for(Task t : subList) {
+                        i++;
+                        sb.append("您在该时间段有如下事务，请输入序号以删除：\n");
+                        if(i < 10) sb.append("["); else sb.append("[ ");
+                        sb.append(i);
+                        sb.append("]");
+                        sb.append(t.getTaskContent());
+                        sb.append("\n");
+                    }
+                }
+            }
+//            TaskPlugin.INSTANCE.tasks.getTasks().remove();
         }
         return false;
     }
