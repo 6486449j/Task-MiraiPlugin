@@ -7,9 +7,25 @@ import java.io.Serializable;
 public class Task /*implements Serializable*/ {
     private Long groupId;
     private Long menberId;
-    private String type;
+    private int type;
     private Long time;
     private String taskContent;
+
+    public Task(Long groupId, Long menberId, int type, Long time, String taskContent) {
+        this.groupId = groupId;
+        this.menberId = menberId;
+        this.type = type;
+        this.time = time;
+        this.taskContent = taskContent;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
 
     public Long getGroupId() {
         return groupId;
@@ -43,11 +59,4 @@ public class Task /*implements Serializable*/ {
         this.taskContent = taskContent;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 }

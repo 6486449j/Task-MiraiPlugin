@@ -1,3 +1,4 @@
+import Bean.Task;
 import kotlin.coroutines.CoroutineContext;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.SimpleListenerHost;
@@ -55,6 +56,7 @@ public class MyEventsListener extends SimpleListenerHost {
             }
             if(time.length() == 12) {
 //                PluginData.INSTANCE.getTasks().add(String.valueOf(groupId) + " " + String.valueOf(menberId) + " " + time + " " + m.group(2));
+                TaskPlugin.INSTANCE.tasks.getTasks().add(new Task(groupId, menberId, TaskType.Temp.getIndex(), Long.valueOf(time), m.group(2)));
                 return true;
             }
         }
@@ -77,5 +79,24 @@ public class MyEventsListener extends SimpleListenerHost {
 //            }
         }
         return false;
+    }
+    enum TaskType{
+        Monthly(0),
+        Weekly(1),
+        Daily(2),
+        Temp(3);
+
+        public int index;
+        TaskType(int index) {
+            this.index = index;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public void setIndex(int index) {
+            this.index = index;
+        }
     }
 }
