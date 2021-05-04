@@ -8,10 +8,10 @@ public class Task /*implements Serializable*/ {
     private Long groupId;
     private Long menberId;
     private int type;
-    private Long time;
+    private String time;
     private String taskContent;
 
-    public Task(Long groupId, Long menberId, int type, Long time, String taskContent) {
+    public Task(Long groupId, Long menberId, int type, String time, String taskContent) {
         this.groupId = groupId;
         this.menberId = menberId;
         this.type = type;
@@ -43,11 +43,11 @@ public class Task /*implements Serializable*/ {
         this.menberId = menberId;
     }
 
-    public Long getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(Long time) {
+    public void setTime(String time) {
         this.time = time;
     }
 

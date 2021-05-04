@@ -1,6 +1,7 @@
 import Bean.Task;
 import com.alibaba.fastjson.JSONObject;
 import kotlin.coroutines.CoroutineContext;
+import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.SimpleListenerHost;
 import net.mamoe.mirai.event.events.FriendMessageEvent;
@@ -16,6 +17,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MyEventsListener extends SimpleListenerHost {
+    private boolean removeTaskFlag = false;
+    private List<Task> removingTaskList = null;
+    private int removeListLenght = -1;
+    private Long removingTaskMenber = 0L;
 
     @Override
     public void handleException(@NotNull CoroutineContext context, @NotNull Throwable exception) {
@@ -29,6 +34,10 @@ public class MyEventsListener extends SimpleListenerHost {
             if(testAddTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
                 event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
             }
+            if(testRemoveTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
+//                event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
+                event.getSubject().sendMessage("删除事务成功");
+            }
         }
     }
 
@@ -37,7 +46,6 @@ public class MyEventsListener extends SimpleListenerHost {
     public void friendMsgEvent(@NotNull FriendMessageEvent event) throws Exception {
         if(event.getFriend().getId() == PluginConfig.INSTANCE.getAdmin()) {
             if(testAddTask(0L, event.getSubject().getId(), event.getMessage().contentToString())) {
-//                event.getSubject().sendMessage(PluginData.INSTANCE.getTasks().toString());
                 event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
             }
         }
@@ -60,9 +68,8 @@ public class MyEventsListener extends SimpleListenerHost {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
                 time = sdf.format(date) + time;
             }
-            if(time.length() == 12) {
-//                PluginData.INSTANCE.getTasks().add(String.valueOf(groupId) + " " + String.valueOf(menberId) + " " + time + " " + m.group(2));
-                TaskPlugin.INSTANCE.tasks.getTasks().add(new Task(groupId, menberId, TaskType.Temp.getIndex(), Long.valueOf(time), m.group(2)));
+            if(time.length() == 12 && Utils.timeFormater(time)) {
+                TaskPlugin.INSTANCE.tasks.getTasks().add(new Task(groupId, menberId, TaskType.Temp.getIndex(), time, m.group(2)));
                 return true;
             }
         }
@@ -71,22 +78,35 @@ public class MyEventsListener extends SimpleListenerHost {
 
     // 测试删除事务命令
     public boolean testRemoveTask(Long groupId, Long menberId, String rawMsg) {
+        if(removeTaskFlag && removingTaskMenber == menberId) {
+            String pattern = "\\s+(\\d+)";
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(rawMsg);
+            if(m.find()) {
+                int removingIndex = Integer.valueOf(m.group(1));
+                TaskPlugin.INSTANCE.tasks.getTasks().remove(removingTaskList.get(removingIndex));
+                return true;
+            }
+        }
         String pattern = "^删除事务\\s+(\\d+)";
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(rawMsg);
-
         String time = m.group(1);
+
         if(m.find()) {
             List<Task> subList = new ArrayList();
             for(Task task : TaskPlugin.INSTANCE.tasks.getTasks()) {
-                if(task.getGroupId() == groupId && task.getMenberId() == menberId && task.getTime() == Long.valueOf(time)) {
+                if(task.getGroupId() == groupId && task.getMenberId() == menberId && task.getTime() == time) {
                     subList.add(task);
                 }
             }
+
             if(subList.size() >= 1) {
+                removeTaskFlag = true;
                 if(subList.size() == 1) {
                     TaskPlugin.INSTANCE.tasks.getTasks().remove(subList.get(0));
                 } else {
+                    removingTaskList = subList;
                     StringBuilder sb = new StringBuilder();
                     int i = 0;
                     for(Task t : subList) {
@@ -98,6 +118,7 @@ public class MyEventsListener extends SimpleListenerHost {
                         sb.append(t.getTaskContent());
                         sb.append("\n");
                     }
+                    removeListLenght = i;
                 }
             }
         }

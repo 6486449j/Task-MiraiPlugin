@@ -16,8 +16,6 @@ public final class TaskPlugin extends JavaPlugin {
 
     public MiraiLogger logger = getLogger();
 
-//    public String dataPath = PluginConfig.INSTANCE.getDataPath();
-
     private List<TaskChecker> checkers = new ArrayList<>();
 
     public File configPath;
@@ -116,16 +114,6 @@ public final class TaskPlugin extends JavaPlugin {
                 tasks.setTasks(new ArrayList<>());
 
                 writeConfig();
-
-/*
-                try {
-                    FileOutputStream fos = new FileOutputStream(configFile);
-                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-                    bw.write(JSONObject.toJSONString(tasks));
-                } catch(Exception e) {
-                    e.printStackTrace();
-                }
-*/
 
                 logger.info("文件为空，设置新数据");
             } else {
