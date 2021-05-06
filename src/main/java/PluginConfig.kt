@@ -3,6 +3,7 @@ import net.mamoe.mirai.console.data.value
 
 object PluginConfig : AutoSavePluginConfig("test_config") {
     val admin by value<Long>(0);
+    val users : List<Long> by value();
     val groups : List<Long> by value();
     val addTaskCmd : String by value("添加事务")
     val rmTaskCmd : String by value("删除事务")

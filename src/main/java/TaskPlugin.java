@@ -91,7 +91,7 @@ public final class TaskPlugin extends JavaPlugin {
         //加载配置
         TaskPlugin.INSTANCE.reloadPluginConfig(PluginConfig.INSTANCE);
 
-        configPath = getConfigFolder();
+        configPath = getDataFolder();
         configFile = new File(configPath, "test_config.json");
         //加载数据
         try {
