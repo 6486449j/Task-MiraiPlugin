@@ -56,7 +56,7 @@ public class MyEventsListener extends SimpleListenerHost {
                     if(Utils.timeFormater(time)) {
                         TaskPlugin.INSTANCE.tasks.getTasks().add(new Task(groupId, menberId, TaskType.Temp.getIndex(), time, m.group(2)));
 
-                        event.getSubject().sendMessage("事务添加成功，将会在" + m.group(2) + "的时候提醒您");
+                        event.getSubject().sendMessage("事务添加成功，将会在" + m.group(1) + "的时候提醒您");
                     } else {
                         event.getSubject().sendMessage("时间格式错误，请检查命令");
                     }
