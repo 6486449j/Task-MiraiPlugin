@@ -184,6 +184,15 @@ public class MyEventsListener extends SimpleListenerHost {
 
                 event.getSubject().sendMessage(sb.toString());
             }
+
+            // 帮助
+            String pattern4 = "^帮助\\s*";
+            p = Pattern.compile(pattern4);
+            m = p.matcher(msg);
+
+            if(m.find()) {
+                event.getSubject().sendMessage("事务命令：\n添加事务 时间 事务内容\n删除事务 事务时间\n列出事务\n\n时间格式：\n完整时间 yyyyMMddHHmm 例 202105061755\n八位时间 MMddHHmm 例 05061755\n六位时间 ddHHmm 例 061755\n四位时间 HHmm 例 1755\n注意：\n小时采用二十四制，日期月份小时分钟等若不足二位则在前面补零");
+            }
         }
     }
 
