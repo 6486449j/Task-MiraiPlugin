@@ -19,7 +19,6 @@ import java.util.regex.Pattern;
 public class MyEventsListener extends SimpleListenerHost {
     private boolean removeTaskFlag = false;
     private List<Task> removingTaskList = null;
-    private Long removingTaskMenberId = 0L;
 
     @Override
     public void handleException(@NotNull CoroutineContext context, @NotNull Throwable exception) {
@@ -65,30 +64,42 @@ public class MyEventsListener extends SimpleListenerHost {
             }
 
             //删除事务
-            String pattern2 = "^删除事务\\s+(\\d+)";
-            Pattern p2 = Pattern.compile(pattern2);
-            Matcher m2 = p2.matcher(msg);
-
             if(removeTaskFlag) {
-                String patternp = "\\s(\\d+)\\s";
+                TaskPlugin.INSTANCE.logger.info("remove task in list");
+
+                String patternp = "\\s*(\\d+)\\s*";
                 Pattern pp = Pattern.compile(patternp);
                 Matcher mm = pp.matcher(msg);
 
                 if(mm.find()) {
-                    int removingTaskIndex = Integer.valueOf(mm.group(0));
+                    TaskPlugin.INSTANCE.logger.info("find the index");
+
+                    int removingTaskIndex = -1;
+                    try {
+                        removingTaskIndex = Integer.parseInt(mm.group(1));
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
 
                     if(removingTaskIndex <= removingTaskList.size()) {
                         TaskPlugin.INSTANCE.tasks.getTasks().remove(removingTaskList.get(removingTaskIndex));
 
                         event.getSubject().sendMessage("删除成功");
+                    } else if(removingTaskIndex == -1) {
+                        event.getSubject().sendMessage("错误发生");
                     } else {
                         event.getSubject().sendMessage("输入的数字在范围外！");
                     }
                 }
+                removeTaskFlag = false;
             }
 
+            String pattern2 = "^删除事务\\s+(\\d+)";
+            Pattern p2 = Pattern.compile(pattern2);
+            Matcher m2 = p2.matcher(msg);
+
             if(m2.find()) {
-                String time = m.group(1);
+                String time = m2.group(1);
 
                 Date date = new Date();
 
@@ -136,15 +147,14 @@ public class MyEventsListener extends SimpleListenerHost {
 
                         int i = 0;
 
+                        sb.append("您在该时间段有如下事务，请输入序号以删除：\n");
                         for (Task t : subList) {
-                            i++;
-                            sb.append("您在该时间段有如下事务，请输入序号以删除：\n");
-                            if (i < 10) sb.append("[");
-                            else sb.append("[ ");
+                            if (i < 10) sb.append("["); else sb.append("[ ");
                             sb.append(i);
                             sb.append("]");
                             sb.append(t.getTaskContent());
                             sb.append("\n");
+                            i++;
                         }
 
                         event.getSubject().sendMessage(sb.toString());
@@ -153,12 +163,26 @@ public class MyEventsListener extends SimpleListenerHost {
             }
 
             //列出事务
-            String pattern3 = "^列出事务\\s";
+            String pattern3 = "^列出事务\\s*";
             Pattern p3 = Pattern.compile(pattern3);
             Matcher m3 = p3.matcher(msg);
 
             if(m3.find()) {
-                event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
+                StringBuilder sb = new StringBuilder();
+                List<Task> subList = new ArrayList<>();
+
+                for(Task task : TaskPlugin.INSTANCE.tasks.getTasks()) {
+                    if(task.getMenberId().equals(menberId) && task.getGroupId().equals(groupId)) {
+                        subList.add(task);
+                    }
+                }
+
+                sb.append("您的事务有如下：");
+                for(Task task : subList) {
+                    sb.append(task.getTime() + " " + task.getTaskContent() + "\n");
+                }
+
+                event.getSubject().sendMessage(sb.toString());
             }
         }
     }

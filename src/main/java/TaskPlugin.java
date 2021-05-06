@@ -113,12 +113,21 @@ public final class TaskPlugin extends JavaPlugin {
 
             //读入文件
             String str;
+            String str2 = "";
             while((str = br.readLine()) != null) {
+                str2 += str;
+
+/*
+                JSONObject jsonObject = JSONObject.parseObject(str2);
+                tasks = JSONObject.toJavaObject(jsonObject, Tasks.class);
+*/
+
                 logger.info("读入数据");
             }
+            readData = true;
 
             //判断文件是否为空
-            if(str == null) {
+            if(str2 == "") {
                 tasks = new Tasks();
                 tasks.setTasks(new ArrayList<>());
 
@@ -129,8 +138,10 @@ public final class TaskPlugin extends JavaPlugin {
                 readData = true;
             } else {
                 //读取数据，将JSON转换成对象
-                JSONObject jsonObject = JSONObject.parseObject(str);
-                tasks = JSONObject.toJavaObject(jsonObject, Tasks.class);
+                tasks = JSONObject.parseObject(str2, Tasks.class);
+
+//                if(tasks.getTasks() == null) tasks.setTasks(new ArrayList<>());
+
                 logger.info("文件不为空，读入数据");
 
                 readData = true;
