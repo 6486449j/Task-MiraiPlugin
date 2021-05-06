@@ -1,6 +1,5 @@
 # Task-MiraiPlugin
-一个管理事务的 [ 'mirai-console' ] 插件
-[mirai-console]: https://github.com/mamoe/mirai-console
+一个管理事务的 [mirai-console](https://github.com/mamoe/mirai-console) 插件
 
 ## 功能
 
