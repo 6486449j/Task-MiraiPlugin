@@ -23,6 +23,8 @@ public final class TaskPlugin extends JavaPlugin {
 
     public Tasks tasks;
 
+    public boolean readData = false;
+
     private TaskPlugin() {
         super(new JvmPluginDescriptionBuilder("com.v6486449j.task-plugin", "1.0.0")
         .author("6486449j")
@@ -123,11 +125,15 @@ public final class TaskPlugin extends JavaPlugin {
                 writeConfig();
 
                 logger.info("文件为空，设置新数据");
+
+                readData = true;
             } else {
                 //读取数据，将JSON转换成对象
                 JSONObject jsonObject = JSONObject.parseObject(str);
                 tasks = JSONObject.toJavaObject(jsonObject, Tasks.class);
                 logger.info("文件不为空，读入数据");
+
+                readData = true;
             }
 
             fis.close();

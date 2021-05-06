@@ -49,7 +49,15 @@ public class MyEventsListener extends SimpleListenerHost {
                 } else {
                     event.getSubject().sendMessage(removeResult.getStr());
                 }
-            }
+            } /*else {
+                event.getSubject().sendMessage("删除失败");
+            }*/
+
+            if(testListTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
+                event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
+            } /*else {
+                event.getSubject().sendMessage("列出失败");
+            }*/
         }
     }
 
@@ -65,6 +73,18 @@ public class MyEventsListener extends SimpleListenerHost {
                     event.getSubject().sendMessage("时间格式错误，请检查命令");
                 }
             }
+        }
+    }
+
+    public boolean testListTask(Long groupId, Long menberId, String rawMsg) {
+        String pattern = "^列出事务\\s";
+        Pattern p = Pattern.compile(pattern);
+        Matcher m = p.matcher(rawMsg);
+
+        if(m.find()) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -107,30 +127,20 @@ public class MyEventsListener extends SimpleListenerHost {
     }
 
     // 测试删除事务命令
-    public RemoveTaskResult testRemoveTask(Long groupId, Long menberId, String rawMsg) {
-        RemoveTaskResult result = new RemoveTaskResult(false, "");
-        if(removeTaskFlag && removingTaskMenber == menberId) {
-            String pattern = "\\s+(\\d+)";
-            Pattern p = Pattern.compile(pattern);
-            Matcher m = p.matcher(rawMsg);
-            if(m.find()) {
-                int removingIndex = Integer.valueOf(m.group(1));
-                TaskPlugin.INSTANCE.tasks.getTasks().remove(removingTaskList.get(removingIndex));
-                result.setStatus(true);
-                return result;
-            }
-        }
+    public TestTaskResult testRemoveTask(Long groupId, Long menberId, String rawMsg) {
+        TestTaskResult result = new TestTaskResult(false, false, false, "");
 
         String pattern = "^删除事务\\s+(\\d+)";
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(rawMsg);
-        String time;
 
         if(m.find()) {
-            time = m.group(1);
+            result.setFind(true);
+            String time = m.group(1);
 
             Date date = new Date();
 
+            // 补全时间格式
             if(time.length() == 4) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
                 time = sdf.format(date) + time;
@@ -142,19 +152,30 @@ public class MyEventsListener extends SimpleListenerHost {
             }
 
             List<Task> subList = new ArrayList();
+
             for(Task task : TaskPlugin.INSTANCE.tasks.getTasks()) {
-                if(task.getGroupId() == groupId && task.getMenberId() == menberId && task.getTime() == time) {
+                TaskPlugin.INSTANCE.logger.info(time);
+                TaskPlugin.INSTANCE.logger.info(task.getTime());
+
+                if(task.getGroupId().equals(groupId) && task.getMenberId().equals(menberId) && task.getTime().equals(time)) {
                     subList.add(task);
+
+                    TaskPlugin.INSTANCE.logger.info("add to sublist");
                 }
             }
 
             if(subList.size() >= 1) {
+                TaskPlugin.INSTANCE.logger.info("sublist >= 1");
                 removeTaskFlag = true;
+
                 if(subList.size() == 1) {
                     TaskPlugin.INSTANCE.tasks.getTasks().remove(subList.get(0));
+                    TaskPlugin.INSTANCE.logger.info("sublist == 1");
+
                     result.setStatus(true);
                     return result;
                 } else {
+                    TaskPlugin.INSTANCE.logger.info("sublist > 1");
                     removingTaskList = subList;
                     StringBuilder sb = new StringBuilder();
                     int i = 0;
@@ -167,13 +188,12 @@ public class MyEventsListener extends SimpleListenerHost {
                         sb.append(t.getTaskContent());
                         sb.append("\n");
                     }
-                    removeListLenght = i;
 
                     result.setStr(sb.toString());
-                    return result;
                 }
             }
         }
+
         return result;
     }
 
@@ -197,13 +217,33 @@ public class MyEventsListener extends SimpleListenerHost {
             this.index = index;
         }
     }
-    class RemoveTaskResult {
+    class TestTaskResult {
+        boolean find;
+        boolean seccese;
         boolean status;
         String str;
 
-        public RemoveTaskResult(boolean status, String str) {
+        public TestTaskResult(boolean find, boolean seccese, boolean status, String str) {
+            this.find = find;
+            this.seccese = seccese;
             this.status = status;
             this.str = str;
+        }
+
+        public boolean isFind() {
+            return find;
+        }
+
+        public void setFind(boolean find) {
+            this.find = find;
+        }
+
+        public boolean isSeccese() {
+            return seccese;
+        }
+
+        public void setSeccese(boolean seccese) {
+            this.seccese = seccese;
         }
 
         public boolean isStatus() {

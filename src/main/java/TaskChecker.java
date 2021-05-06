@@ -46,6 +46,8 @@ public class TaskChecker implements Runnable{
 
         tasks.removeAll(removed);
 
-        TaskPlugin.INSTANCE.writeConfig();
+        if(TaskPlugin.INSTANCE.readData) {
+            TaskPlugin.INSTANCE.writeConfig();
+        }
     }
 }
