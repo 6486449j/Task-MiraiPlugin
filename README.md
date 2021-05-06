@@ -1,19 +1,33 @@
 # Task-MiraiPlugin
 一个管理事务的
 
-[mirai-console]: https://github.com/mamoe/mirai-console
+[mirai-console]: https://github.com/mamoe/mirai-console	"mirai-console"
 
 插件
 
 ## 功能
 
-定时事务，即到点提醒的功能。
+定时事务，在私聊和群聊中提醒你要做的事。
 
 ## 使用
 
 首先要让机器人知道哪些群，哪些人是需要启用事务功能的
 
-在Config文件中设置
+在Config文件中设置要启用的用户QQ和群号
+
+```
+mirai/Config/com.V6486449j.task-plugin/config.yaml
+
+admin: xxx(管理员)
+users:
+ -xxx（要启用的用户）
+ -xxx
+ -...
+groups:
+ -xxx(要启用的群)
+ -xxx
+ -...
+```
 
 要添加事务，使用
 
