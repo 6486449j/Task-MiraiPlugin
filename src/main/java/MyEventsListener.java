@@ -31,6 +31,10 @@ public class MyEventsListener extends SimpleListenerHost {
     @EventHandler
     public void groupMsgEvent(@NotNull GroupMessageEvent event) throws Exception {
         if(PluginConfig.INSTANCE.getGroups().contains(event.getGroup().getId())) {
+            String msg = event.getMessage().contentToString();
+            Long groupId = event.getGroup().getId();
+            Long menberId = event.getSender().getId();
+
             boolean[] addTaskResult = testAddTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString());
 
             if(addTaskResult[0]) {
@@ -41,17 +45,71 @@ public class MyEventsListener extends SimpleListenerHost {
                 }
             }
 
-            RemoveTaskResult removeResult = testRemoveTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString());
+            String pattern = "^删除事务\\s+(\\d+)";
+            Pattern p = Pattern.compile(pattern);
+            Matcher m = p.matcher(msg);
 
-            if(removeResult.isStatus()) {
-                if(removeResult.getStr() == "") {
-                    event.getSubject().sendMessage("删除事务成功");
-                } else {
-                    event.getSubject().sendMessage(removeResult.getStr());
+            if(m.find()) {
+                String time = m.group(1);
+
+                Date date = new Date();
+
+                // 补全时间格式
+                if (time.length() == 4) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                    time = sdf.format(date) + time;
                 }
-            } /*else {
-                event.getSubject().sendMessage("删除失败");
-            }*/
+
+                if (time.length() == 8) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+                    time = sdf.format(date) + time;
+                }
+
+                List<Task> subList = new ArrayList();
+
+                for (Task task : TaskPlugin.INSTANCE.tasks.getTasks()) {
+                    TaskPlugin.INSTANCE.logger.info(time);
+                    TaskPlugin.INSTANCE.logger.info(task.getTime());
+
+                    if (task.getGroupId().equals(groupId) && task.getMenberId().equals(menberId) && task.getTime().equals(time)) {
+                        subList.add(task);
+
+                        TaskPlugin.INSTANCE.logger.info("add to sublist");
+                    }
+                }
+
+                if (subList.size() >= 1) {
+                    TaskPlugin.INSTANCE.logger.info("sublist >= 1");
+
+                    if (subList.size() == 1) {
+                        TaskPlugin.INSTANCE.tasks.getTasks().remove(subList.get(0));
+
+                        event.getSubject().sendMessage("删除事务成功");
+
+                        TaskPlugin.INSTANCE.logger.info("sublist == 1");
+
+                    } else {
+                        TaskPlugin.INSTANCE.logger.info("sublist > 1");
+
+                        StringBuilder sb = new StringBuilder();
+
+                        int i = 0;
+
+                        for (Task t : subList) {
+                            i++;
+                            sb.append("您在该时间段有如下事务，请输入序号以删除：\n");
+                            if (i < 10) sb.append("[");
+                            else sb.append("[ ");
+                            sb.append(i);
+                            sb.append("]");
+                            sb.append(t.getTaskContent());
+                            sb.append("\n");
+                        }
+
+                        event.getSubject().sendMessage(sb.toString());
+                    }
+                }
+            }
 
             if(testListTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
                 event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
