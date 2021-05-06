@@ -32,64 +32,10 @@ public final class TaskPlugin extends JavaPlugin {
 
     @Override
     public void onLoad(@NotNull PluginComponentStorage $this$onLoad) {
-        configPath = getConfigFolder();
-        configFile = new File(configPath, "test_config.json");
-
-        //加载数据
-        try {
-
-            //检测路径是否存在
-            if(!configPath.exists()) {
-                configPath.mkdirs();
-                logger.info("创建路径");
-            }
-
-            //检测文件是否存在
-            if(!configFile.exists()) {
-                configFile.createNewFile();
-                logger.info("创建文件");
-            }
-
-            FileInputStream fis = new FileInputStream(configFile);
-            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-
-            //读入文件
-            String str;
-            while((str = br.readLine()) != null) {
-                logger.info("读入数据");
-            }
-
-            //判断文件是否为空
-            if(str == null) {
-                tasks = new Tasks();
-                tasks.setTasks(new ArrayList<>());
-
-                writeConfig();
-
-                logger.info("文件为空，设置新数据");
-            } else {
-                //读取数据，将JSON转换成对象
-                JSONObject jsonObject = JSONObject.parseObject(str);
-                tasks = JSONObject.toJavaObject(jsonObject, Tasks.class);
-                logger.info("文件不为空，读入数据");
-            }
-
-            fis.close();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onEnable() {
-        logger.info("TaskPlugin加载");
-
-        //加载配置
-        TaskPlugin.INSTANCE.reloadPluginConfig(PluginConfig.INSTANCE);
-
 /*
         configPath = getConfigFolder();
         configFile = new File(configPath, "test_config.json");
+
         //加载数据
         try {
 
@@ -134,6 +80,60 @@ public final class TaskPlugin extends JavaPlugin {
             e.printStackTrace();
         }
 */
+    }
+
+    @Override
+    public void onEnable() {
+        logger.info("TaskPlugin加载");
+
+        //加载配置
+        TaskPlugin.INSTANCE.reloadPluginConfig(PluginConfig.INSTANCE);
+
+        configPath = getConfigFolder();
+        configFile = new File(configPath, "test_config.json");
+        //加载数据
+        try {
+
+            //检测路径是否存在
+            if(!configPath.exists()) {
+                configPath.mkdirs();
+                logger.info("创建路径");
+            }
+
+            //检测文件是否存在
+            if(!configFile.exists()) {
+                configFile.createNewFile();
+                logger.info("创建文件");
+            }
+
+            FileInputStream fis = new FileInputStream(configFile);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+
+            //读入文件
+            String str;
+            while((str = br.readLine()) != null) {
+                logger.info("读入数据");
+            }
+
+            //判断文件是否为空
+            if(str == null) {
+                tasks = new Tasks();
+                tasks.setTasks(new ArrayList<>());
+
+                writeConfig();
+
+                logger.info("文件为空，设置新数据");
+            } else {
+                //读取数据，将JSON转换成对象
+                JSONObject jsonObject = JSONObject.parseObject(str);
+                tasks = JSONObject.toJavaObject(jsonObject, Tasks.class);
+                logger.info("文件不为空，读入数据");
+            }
+
+            fis.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
 
         INSTANCE.getScheduler().delayed(2000, () -> {
             //获取所有Bot实例

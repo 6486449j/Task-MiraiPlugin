@@ -32,6 +32,7 @@ public class MyEventsListener extends SimpleListenerHost {
     public void groupMsgEvent(@NotNull GroupMessageEvent event) throws Exception {
         if(PluginConfig.INSTANCE.getGroups().contains(event.getGroup().getId())) {
             boolean[] addTaskResult = testAddTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString());
+
             if(addTaskResult[0]) {
                 if(addTaskResult[1]) {
                     event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
@@ -39,9 +40,15 @@ public class MyEventsListener extends SimpleListenerHost {
                     event.getSubject().sendMessage("时间格式错误，请检查命令");
                 }
             }
-            if(testRemoveTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
-//                event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
-                event.getSubject().sendMessage("删除事务成功");
+
+            RemoveTaskResult removeResult = testRemoveTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString());
+
+            if(removeResult.isStatus()) {
+                if(removeResult.getStr() == "") {
+                    event.getSubject().sendMessage("删除事务成功");
+                } else {
+                    event.getSubject().sendMessage(removeResult.getStr());
+                }
             }
         }
     }
@@ -72,28 +79,36 @@ public class MyEventsListener extends SimpleListenerHost {
         if(m.find()) {
             String time = m.group(1);
             Date date = new Date();
+
             if(time.length() == 4) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
                 time = sdf.format(date) + time;
             }
+
             if(time.length() == 8) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
                 time = sdf.format(date) + time;
             }
+
             if(time.length() == 12) {
-                if(Utils.timeFormater(m.group(1))) {
+                if(Utils.timeFormater(time)) {
                     TaskPlugin.INSTANCE.tasks.getTasks().add(new Task(groupId, menberId, TaskType.Temp.getIndex(), time, m.group(2)));
+                    result[0] = true;
+                    TaskPlugin.INSTANCE.logger.info("时间检查通过");
                 } else {
+                    result[0] = true;
                     result[1] = false;
-                    return result;
+                    TaskPlugin.INSTANCE.logger.info("时间检查未通过");
                 }
             }
         }
+
         return result;
     }
 
     // 测试删除事务命令
-    public boolean testRemoveTask(Long groupId, Long menberId, String rawMsg) {
+    public RemoveTaskResult testRemoveTask(Long groupId, Long menberId, String rawMsg) {
+        RemoveTaskResult result = new RemoveTaskResult(false, "");
         if(removeTaskFlag && removingTaskMenber == menberId) {
             String pattern = "\\s+(\\d+)";
             Pattern p = Pattern.compile(pattern);
@@ -101,16 +116,31 @@ public class MyEventsListener extends SimpleListenerHost {
             if(m.find()) {
                 int removingIndex = Integer.valueOf(m.group(1));
                 TaskPlugin.INSTANCE.tasks.getTasks().remove(removingTaskList.get(removingIndex));
-                return true;
+                result.setStatus(true);
+                return result;
             }
         }
 
         String pattern = "^删除事务\\s+(\\d+)";
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(rawMsg);
-        String time = m.group(1);
+        String time;
 
         if(m.find()) {
+            time = m.group(1);
+
+            Date date = new Date();
+
+            if(time.length() == 4) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                time = sdf.format(date) + time;
+            }
+
+            if(time.length() == 8) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+                time = sdf.format(date) + time;
+            }
+
             List<Task> subList = new ArrayList();
             for(Task task : TaskPlugin.INSTANCE.tasks.getTasks()) {
                 if(task.getGroupId() == groupId && task.getMenberId() == menberId && task.getTime() == time) {
@@ -122,6 +152,8 @@ public class MyEventsListener extends SimpleListenerHost {
                 removeTaskFlag = true;
                 if(subList.size() == 1) {
                     TaskPlugin.INSTANCE.tasks.getTasks().remove(subList.get(0));
+                    result.setStatus(true);
+                    return result;
                 } else {
                     removingTaskList = subList;
                     StringBuilder sb = new StringBuilder();
@@ -136,10 +168,13 @@ public class MyEventsListener extends SimpleListenerHost {
                         sb.append("\n");
                     }
                     removeListLenght = i;
+
+                    result.setStr(sb.toString());
+                    return result;
                 }
             }
         }
-        return false;
+        return result;
     }
 
     enum TaskType {
@@ -160,6 +195,31 @@ public class MyEventsListener extends SimpleListenerHost {
 
         public void setIndex(int index) {
             this.index = index;
+        }
+    }
+    class RemoveTaskResult {
+        boolean status;
+        String str;
+
+        public RemoveTaskResult(boolean status, String str) {
+            this.status = status;
+            this.str = str;
+        }
+
+        public boolean isStatus() {
+            return status;
+        }
+
+        public void setStatus(boolean status) {
+            this.status = status;
+        }
+
+        public String getStr() {
+            return str;
+        }
+
+        public void setStr(String str) {
+            this.str = str;
         }
     }
 }
