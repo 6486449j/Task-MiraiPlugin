@@ -19,8 +19,7 @@ import java.util.regex.Pattern;
 public class MyEventsListener extends SimpleListenerHost {
     private boolean removeTaskFlag = false;
     private List<Task> removingTaskList = null;
-    private int removeListLenght = -1;
-    private Long removingTaskMenber = 0L;
+    private Long removingTaskMenberId = 0L;
 
     @Override
     public void handleException(@NotNull CoroutineContext context, @NotNull Throwable exception) {
@@ -70,6 +69,24 @@ public class MyEventsListener extends SimpleListenerHost {
             Pattern p2 = Pattern.compile(pattern2);
             Matcher m2 = p2.matcher(msg);
 
+            if(removeTaskFlag) {
+                String patternp = "\\s(\\d+)\\s";
+                Pattern pp = Pattern.compile(patternp);
+                Matcher mm = pp.matcher(msg);
+
+                if(mm.find()) {
+                    int removingTaskIndex = Integer.valueOf(mm.group(0));
+
+                    if(removingTaskIndex <= removingTaskList.size()) {
+                        TaskPlugin.INSTANCE.tasks.getTasks().remove(removingTaskList.get(removingTaskIndex));
+
+                        event.getSubject().sendMessage("删除成功");
+                    } else {
+                        event.getSubject().sendMessage("输入的数字在范围外！");
+                    }
+                }
+            }
+
             if(m2.find()) {
                 String time = m.group(1);
 
@@ -110,6 +127,9 @@ public class MyEventsListener extends SimpleListenerHost {
                         TaskPlugin.INSTANCE.logger.info("sublist == 1");
 
                     } else {
+                        removeTaskFlag = true;
+                        removingTaskList = subList;
+
                         TaskPlugin.INSTANCE.logger.info("sublist > 1");
 
                         StringBuilder sb = new StringBuilder();
