@@ -35,21 +35,42 @@ public class MyEventsListener extends SimpleListenerHost {
             Long groupId = event.getGroup().getId();
             Long menberId = event.getSender().getId();
 
-            boolean[] addTaskResult = testAddTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString());
-
-            if(addTaskResult[0]) {
-                if(addTaskResult[1]) {
-                    event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
-                } else {
-                    event.getSubject().sendMessage("时间格式错误，请检查命令");
-                }
-            }
-
-            String pattern = "^删除事务\\s+(\\d+)";
+            //添加事务
+            String pattern = "^添加事务\\s+(\\d+)\\s+(.*)";
             Pattern p = Pattern.compile(pattern);
             Matcher m = p.matcher(msg);
 
             if(m.find()) {
+                String time = m.group(1);
+                Date date = new Date();
+
+                if(time.length() == 4) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                    time = sdf.format(date) + time;
+                }
+
+                if(time.length() == 8) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+                    time = sdf.format(date) + time;
+                }
+
+                if(time.length() == 12) {
+                    if(Utils.timeFormater(time)) {
+                        TaskPlugin.INSTANCE.tasks.getTasks().add(new Task(groupId, menberId, TaskType.Temp.getIndex(), time, m.group(2)));
+
+                        event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
+                    } else {
+                        event.getSubject().sendMessage("时间格式错误，请检查命令");
+                    }
+                }
+            }
+
+            //删除事务
+            String pattern2 = "^删除事务\\s+(\\d+)";
+            Pattern p2 = Pattern.compile(pattern2);
+            Matcher m2 = p2.matcher(msg);
+
+            if(m2.find()) {
                 String time = m.group(1);
 
                 Date date = new Date();
@@ -111,11 +132,14 @@ public class MyEventsListener extends SimpleListenerHost {
                 }
             }
 
-            if(testListTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
+            //列出事务
+            String pattern3 = "^列出事务\\s";
+            Pattern p3 = Pattern.compile(pattern3);
+            Matcher m3 = p3.matcher(msg);
+
+            if(m3.find()) {
                 event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
-            } /*else {
-                event.getSubject().sendMessage("列出失败");
-            }*/
+            }
         }
     }
 
