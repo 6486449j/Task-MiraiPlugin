@@ -34,7 +34,7 @@ public class MyEventsListener extends SimpleListenerHost {
             Long menberId = event.getSender().getId();
 
             //添加事务
-            String pattern = "^添加事务\\s+(\\d+)\\s+(.*)";
+            String pattern = "^" + PluginConfig.INSTANCE.getAddTaskCmd() + "\\s+(\\d+)\\s+(.*)";
             Pattern p = Pattern.compile(pattern);
             Matcher m = p.matcher(msg);
 
@@ -65,14 +65,14 @@ public class MyEventsListener extends SimpleListenerHost {
 
             //删除事务
             if(removeTaskFlag) {
-                TaskPlugin.INSTANCE.logger.info("remove task in list");
+//                TaskPlugin.INSTANCE.logger.info("remove task in list");
 
                 String patternp = "\\s*(\\d+)\\s*";
                 Pattern pp = Pattern.compile(patternp);
                 Matcher mm = pp.matcher(msg);
 
                 if(mm.find()) {
-                    TaskPlugin.INSTANCE.logger.info("find the index");
+//                    TaskPlugin.INSTANCE.logger.info("find the index");
 
                     int removingTaskIndex = -1;
                     try {
@@ -94,7 +94,7 @@ public class MyEventsListener extends SimpleListenerHost {
                 removeTaskFlag = false;
             }
 
-            String pattern2 = "^删除事务\\s+(\\d+)";
+            String pattern2 = "^" + PluginConfig.INSTANCE.getRmTaskCmd() + "\\s+(\\d+)";
             Pattern p2 = Pattern.compile(pattern2);
             Matcher m2 = p2.matcher(msg);
 
@@ -123,25 +123,25 @@ public class MyEventsListener extends SimpleListenerHost {
                     if (task.getGroupId().equals(groupId) && task.getMenberId().equals(menberId) && task.getTime().equals(time)) {
                         subList.add(task);
 
-                        TaskPlugin.INSTANCE.logger.info("add to sublist");
+//                        TaskPlugin.INSTANCE.logger.info("add to sublist");
                     }
                 }
 
                 if (subList.size() >= 1) {
-                    TaskPlugin.INSTANCE.logger.info("sublist >= 1");
+//                    TaskPlugin.INSTANCE.logger.info("sublist >= 1");
 
                     if (subList.size() == 1) {
                         TaskPlugin.INSTANCE.tasks.getTasks().remove(subList.get(0));
 
                         event.getSubject().sendMessage("删除事务成功");
 
-                        TaskPlugin.INSTANCE.logger.info("sublist == 1");
+//                        TaskPlugin.INSTANCE.logger.info("sublist == 1");
 
                     } else {
                         removeTaskFlag = true;
                         removingTaskList = subList;
 
-                        TaskPlugin.INSTANCE.logger.info("sublist > 1");
+//                        TaskPlugin.INSTANCE.logger.info("sublist > 1");
 
                         StringBuilder sb = new StringBuilder();
 
@@ -163,7 +163,7 @@ public class MyEventsListener extends SimpleListenerHost {
             }
 
             //列出事务
-            String pattern3 = "^列出事务\\s*";
+            String pattern3 = "^" + PluginConfig.INSTANCE.getLsTaskCmd() + "\\s*";
             Pattern p3 = Pattern.compile(pattern3);
             Matcher m3 = p3.matcher(msg);
 
@@ -186,12 +186,12 @@ public class MyEventsListener extends SimpleListenerHost {
             }
 
             // 帮助
-            String pattern4 = "^帮助\\s*";
+            String pattern4 = "^" + PluginConfig.INSTANCE.getHelpCmd() + "\\s*";
             p = Pattern.compile(pattern4);
             m = p.matcher(msg);
 
             if(m.find()) {
-                event.getSubject().sendMessage("事务命令：\n添加事务 时间 事务内容\n删除事务 事务时间\n列出事务\n\n时间格式：\n完整时间 yyyyMMddHHmm 例 202105061755\n八位时间 MMddHHmm 例 05061755\n六位时间 ddHHmm 例 061755\n四位时间 HHmm 例 1755\n注意：\n小时采用二十四制，日期月份小时分钟等若不足二位则在前面补零");
+                event.getSubject().sendMessage("事务命令：\n添加事务 时间 事务内容\n删除事务 事务时间\n列出事务\n\n时间格式：\n完整时间 yyyyMMddHHmm 例 202105061755\n八位时间 MMddHHmm 例 05061755\n六位时间 ddHHmm 例 061755\n四位时间 HHmm 例 1755\n注意：\n小时采用二十四制(0 ~ 23)，日期月份小时分钟等若不足二位则在前面补零");
             }
         }
     }
