@@ -31,8 +31,13 @@ public class MyEventsListener extends SimpleListenerHost {
     @EventHandler
     public void groupMsgEvent(@NotNull GroupMessageEvent event) throws Exception {
         if(PluginConfig.INSTANCE.getGroups().contains(event.getGroup().getId())) {
-            if(testAddTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
-                event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
+            boolean[] addTaskResult = testAddTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString());
+            if(addTaskResult[0]) {
+                if(addTaskResult[1]) {
+                    event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
+                } else {
+                    event.getSubject().sendMessage("时间格式错误，请检查命令");
+                }
             }
             if(testRemoveTask(event.getGroup().getId(), event.getSender().getId(), event.getMessage().contentToString())) {
 //                event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
@@ -45,14 +50,21 @@ public class MyEventsListener extends SimpleListenerHost {
     @EventHandler
     public void friendMsgEvent(@NotNull FriendMessageEvent event) throws Exception {
         if(event.getFriend().getId() == PluginConfig.INSTANCE.getAdmin()) {
-            if(testAddTask(0L, event.getSubject().getId(), event.getMessage().contentToString())) {
-                event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
+            boolean[] addTaskResult = testAddTask(0L, event.getSubject().getId(), event.getMessage().contentToString());
+            if(addTaskResult[0]) {
+                if(addTaskResult[1]) {
+                    event.getSubject().sendMessage(JSONObject.toJSONString(TaskPlugin.INSTANCE.tasks));
+                } else {
+                    event.getSubject().sendMessage("时间格式错误，请检查命令");
+                }
             }
         }
     }
 
     // 测试添加事务命令
-    public boolean testAddTask(Long groupId, Long menberId, String rawMsg) {
+    public boolean[] testAddTask(Long groupId, Long menberId, String rawMsg) {
+        boolean[] result = new boolean[] { false, true };
+
         String pattern = "^添加事务\\s+(\\d+)\\s+(.*)";
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(rawMsg);
@@ -68,12 +80,16 @@ public class MyEventsListener extends SimpleListenerHost {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
                 time = sdf.format(date) + time;
             }
-            if(time.length() == 12 && Utils.timeFormater(time)) {
-                TaskPlugin.INSTANCE.tasks.getTasks().add(new Task(groupId, menberId, TaskType.Temp.getIndex(), time, m.group(2)));
-                return true;
+            if(time.length() == 12) {
+                if(Utils.timeFormater(m.group(1))) {
+                    TaskPlugin.INSTANCE.tasks.getTasks().add(new Task(groupId, menberId, TaskType.Temp.getIndex(), time, m.group(2)));
+                } else {
+                    result[1] = false;
+                    return result;
+                }
             }
         }
-        return false;
+        return result;
     }
 
     // 测试删除事务命令
@@ -88,6 +104,7 @@ public class MyEventsListener extends SimpleListenerHost {
                 return true;
             }
         }
+
         String pattern = "^删除事务\\s+(\\d+)";
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(rawMsg);
@@ -125,13 +142,14 @@ public class MyEventsListener extends SimpleListenerHost {
         return false;
     }
 
-    enum TaskType{
+    enum TaskType {
         Monthly(0),
         Weekly(1),
         Daily(2),
         Temp(3);
 
         public int index;
+
         TaskType(int index) {
             this.index = index;
         }

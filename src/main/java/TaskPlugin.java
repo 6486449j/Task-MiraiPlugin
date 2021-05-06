@@ -32,7 +32,10 @@ public final class TaskPlugin extends JavaPlugin {
 
     @Override
     public void onLoad(@NotNull PluginComponentStorage $this$onLoad) {
-        /*//加载数据
+        configPath = getConfigFolder();
+        configFile = new File(configPath, "test_config.json");
+
+        //加载数据
         try {
 
             //检测路径是否存在
@@ -57,9 +60,12 @@ public final class TaskPlugin extends JavaPlugin {
             }
 
             //判断文件是否为空
-            if(str == "") {
+            if(str == null) {
                 tasks = new Tasks();
                 tasks.setTasks(new ArrayList<>());
+
+                writeConfig();
+
                 logger.info("文件为空，设置新数据");
             } else {
                 //读取数据，将JSON转换成对象
@@ -71,7 +77,7 @@ public final class TaskPlugin extends JavaPlugin {
             fis.close();
         } catch(Exception e) {
             e.printStackTrace();
-        }*/
+        }
     }
 
     @Override
@@ -80,8 +86,8 @@ public final class TaskPlugin extends JavaPlugin {
 
         //加载配置
         TaskPlugin.INSTANCE.reloadPluginConfig(PluginConfig.INSTANCE);
-//        TaskPlugin.INSTANCE.reloadPluginData(PluginData.INSTANCE);
 
+/*
         configPath = getConfigFolder();
         configFile = new File(configPath, "test_config.json");
         //加载数据
@@ -127,6 +133,7 @@ public final class TaskPlugin extends JavaPlugin {
         } catch(Exception e) {
             e.printStackTrace();
         }
+*/
 
         INSTANCE.getScheduler().delayed(2000, () -> {
             //获取所有Bot实例

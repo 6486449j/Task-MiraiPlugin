@@ -31,8 +31,9 @@ public class TaskChecker implements Runnable{
 
         // 检查是否有事务到期
         for(Task task : tasks) {
-            try {
-                if (date.before(sdf.parse(task.getTime()))) {
+            Long taskTime = Long.valueOf(task.getTime());
+
+                if (taskTime <= Long.valueOf(sdf.format(date))) {
                     if (task.getGroupId() == 0) {
                         bot.getFriend(task.getMenberId()).sendMessage(task.getTaskContent());
                     } else {
@@ -41,14 +42,10 @@ public class TaskChecker implements Runnable{
 
                     removed.add(task);
                 }
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
         }
 
         tasks.removeAll(removed);
 
         TaskPlugin.INSTANCE.writeConfig();
-
     }
 }
